@@ -1,0 +1,1 @@
+{"timestamp": "2026-05-31T02:56:34.463393", "version_from": "01", "version_to": "01", "reason": "Average return (0.00%) below target (10.00%), loosening entry threshold Sharpe (0.00) below min (1.20), reducing position size", "rule": "deterministic_fallback"}
