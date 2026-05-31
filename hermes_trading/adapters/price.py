@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class PriceAdapter(BaseAdapter):
-    """Adapter for price data using CCXT and Yahoo Finance."""
+    """Adapter for price data using Yahoo Finance as primary, CCXT as fallback."""
 
     def __init__(self):
         self.schema_version = "1.0"
@@ -23,33 +23,33 @@ class PriceAdapter(BaseAdapter):
     async def fetch(self) -> Dict[str, Any]:
         """Fetch current price data."""
         try:
-            # Try CCXT first (works for crypto)
+            # Try Yahoo Finance first (works everywhere, including restricted regions)
             try:
-                symbol = "BTC/USDT"
-                ticker = await self.exchange.fetch_ticker(symbol)
-                price = ticker.get("last", 0)
+                ticker = yf.Ticker("BTC-USD")
+                info = ticker.info
+                price = info.get("currentPrice", 0)
 
                 return {
                     "schema_version": self.schema_version,
                     "asset": "BTC/USDT",
                     "price": price,
                     "rsi": 50,  # Simplified - would need full RSI calculation
-                    "timestamp": ticker.get("timestamp")
+                    "timestamp": info.get("currentTimestamp")
                 }
             except Exception as e:
-                logger.warning(f"CCXT failed, falling back to Yahoo Finance: {e}")
+                logger.warning(f"Yahoo Finance failed, falling back to CCXT: {e}")
 
-            # Fallback to Yahoo Finance
-            ticker = yf.Ticker("BTC-USD")
-            info = ticker.info
-            price = info.get("currentPrice", 0)
+            # Fallback to CCXT
+            symbol = "BTC/USDT"
+            ticker = await self.exchange.fetch_ticker(symbol)
+            price = ticker.get("last", 0)
 
             return {
                 "schema_version": self.schema_version,
                 "asset": "BTC/USDT",
                 "price": price,
                 "rsi": 50,  # Simplified
-                "timestamp": info.get("currentTimestamp")
+                "timestamp": ticker.get("timestamp")
             }
 
         except Exception as e:
