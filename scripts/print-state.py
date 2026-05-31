@@ -6,11 +6,13 @@ from pathlib import Path
 
 # Determine the correct path based on environment
 if os.getenv('RAILWAY_ENVIRONMENT'):
-    # Running on Railway
+    # Running on Railway - use /app/state
     state_dir = Path('/app/state')
 else:
-    # Running locally
+    # Running locally - use state directory in current path
     state_dir = Path.cwd() / 'state'
+
+print(f"Looking in: {state_dir}")
 
 # Read and print files
 print("=== STRATEGY ===")
